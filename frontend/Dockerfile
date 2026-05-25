@@ -1,0 +1,28 @@
+# ========== 构建阶段 ==========
+FROM node:20-alpine AS builder
+
+WORKDIR /build
+COPY package.json package-lock.json* ./
+RUN npm install --registry=https://registry.npmmirror.com
+
+COPY . .
+RUN npm run build
+
+# ========== 运行阶段 ==========
+FROM nginx:alpine
+
+LABEL maintainer="SmartAuto OA Team"
+LABEL description="SmartAuto OA Frontend"
+
+# 复制构建产物
+COPY --from=builder /build/dist /usr/share/nginx/html
+
+# 复制 Nginx 配置
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD wget -qO- http://localhost:80/ || exit 1
+
+CMD ["nginx", "-g", "daemon off;"]

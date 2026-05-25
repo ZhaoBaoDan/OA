@@ -1,0 +1,138 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: smartauto-oa
+  profiles:
+    active: dev
+
+  # MySQL
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/smartauto_oa?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: your_password
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      idle-timeout: 30000
+      max-lifetime: 1800000
+      connection-timeout: 30000
+
+  # Redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: your_redis_password
+      database: 0
+      timeout: 10s
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+          max-wait: -1ms
+
+  # RabbitMQ
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 10
+
+  # Elasticsearch
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: your_es_password
+
+  # Jackson
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+    serialization:
+      write-dates-as-timestamps: false
+
+# MyBatis-Plus
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.smartauto.oa.system.entity
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# JWT
+jwt:
+  header: Authorization
+  secret: your-256-bit-secret-key-here-must-be-at-least-32-bytes-long-for-hs256
+  expiration: 7200000       # 2 hours in ms
+  refreshExpiration: 86400000  # 24 hours in ms
+
+# MinIO
+minio:
+  endpoint: http://localhost:9000
+  access-key: your_access_key
+  secret-key: your_secret_key
+  bucket-name: smartauto-oa
+
+# XXL-JOB
+xxl:
+  job:
+    admin:
+      addresses: http://localhost:8088/xxl-job-admin
+    executor:
+      appname: smartauto-oa-executor
+      ip:
+      port: 9999
+      logpath: /data/applogs/xxl-job/jobhandler
+      logretentiondays: 30
+
+# Flowable
+flowable:
+  async-executor-activate: true
+  database-schema-update: true
+  process-definition-location-prefix: classpath*:/processes/
+
+# Knife4j
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'system'
+      display-name: '系统管理'
+      paths-to-match: '/**'
+      packages-to-scan: com.smartauto.oa.system.controller
+
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+
+# Logging
+logging:
+  level:
+    com.smartauto.oa: debug
+    org.flowable: info
